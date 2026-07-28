@@ -21,11 +21,11 @@ class StatsViewModel(app: Application) : AndroidViewModel(app) {
     private val repo = StatsRepository(app.applicationContext)
 
     val snapshot: StateFlow<UserSnapshot?> = repo.snapshot.stateIn(
-        viewModelScope, SharingStarted.EverythingStops, null,
+        viewModelScope, SharingStarted.WhileSubscribed(5_000), null,
     )
 
     val recentActivity: StateFlow<List<ActivityItem>> = repo.recentActivity.stateIn(
-        viewModelScope, SharingStarted.EverythingStops, emptyList(),
+        viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList(),
     )
 
     /** Fires +1 each time an action is logged, so the UI can trigger confetti. */

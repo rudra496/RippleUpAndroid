@@ -1,11 +1,11 @@
 package com.yft.rippleup.ui.components
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Nutrition
 import androidx.compose.material.icons.outlined.DirectionsBike
 import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.MilitaryTech
-import androidx.compose.material.icons.outlined.Nutrition
 import androidx.compose.material.icons.outlined.Recycling
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material.icons.outlined.WorkspacePremium
@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 @Composable
 fun ecoIcon(name: String): ImageVector = when (name) {
     "WaterDrop" -> Icons.Outlined.WaterDrop
-    "Nutrition" -> Icons.Outlined.Nutrition
+    "Nutrition" -> Icons.Filled.Nutrition
     "Recycling" -> Icons.Outlined.Recycling
     "DirectionsBike" -> Icons.Outlined.DirectionsBike
     "WorkspacePremium" -> Icons.Outlined.WorkspacePremium

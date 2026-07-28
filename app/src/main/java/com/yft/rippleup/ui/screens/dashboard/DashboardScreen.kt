@@ -18,10 +18,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Seedling
 import androidx.compose.material.icons.outlined.Eco
 import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Seedling
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -147,7 +147,7 @@ private fun PointsCard(points: Int, co2Kg: Double) {
                     .padding(horizontal = 14.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(Icons.Outlined.Seedling, contentDescription = null,
+                Icon(Icons.Filled.Seedling, contentDescription = null,
                     tint = EmeraldLight, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
                 AnimatedCounter(
