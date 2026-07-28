@@ -1,0 +1,28 @@
+PERSONAL DATA PROTECTION — RippleUp
+
+Last updated: 20 July 2026
+
+1. We do not operate a backend
+RippleUp is a fully on-device app. There is no server-side database, no user accounts, and no login system. All of your progress (points, streaks, badges, activity) is stored locally on your phone only.
+
+2. Information we do not collect
+- No names are required to use the app; the onboarding name is optional and stays on your device.
+- No email addresses, phone numbers, or identifiers are requested or transmitted.
+- No analytics, session recordings, fingerprinting, or tracking SDKs are embedded.
+
+3. Camera usage
+The QR scanner uses your device camera only while the Scan screen is open, purely to read QR/barcodes on-device via ML Kit. The camera feed is never recorded, saved, or transmitted off the device.
+
+4. Information visible on the leaderboard
+Team member names, roles, and LinkedIn profile links appear on the community leaderboard with each individual's consent. This is static content baked into the app and not tied to your activity.
+
+5. Third-party resources
+This app uses Google ML Kit for on-device barcode scanning. ML Kit processes images locally on the device. RippleUp does not send your data to any server.
+
+6. Local data
+Your points, actions, and name live in a local Room database on your phone. Uninstalling the app erases them. They are never uploaded.
+
+7. Contact
+Privacy enquiries may be opened as a GitHub issue at https://github.com/rudra496/ytf.
+
+— Page maintained by Rudra Sarker, Project Developer · Youth for Tomorrow

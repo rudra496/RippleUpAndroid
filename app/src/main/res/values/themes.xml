@@ -1,0 +1,10 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base theme. The real look is driven by Compose (Theme.kt); this is the
+         launch/splash window so there's no white flash before Compose loads. -->
+    <style name="Theme.RippleUp" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@color/launch_bg</item>
+        <item name="android:navigationBarColor">@color/launch_bg</item>
+        <item name="android:windowBackground">@color/launch_bg</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+    </style>
+</resources>

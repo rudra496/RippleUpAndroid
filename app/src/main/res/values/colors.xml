@@ -1,0 +1,4 @@
+<resources>
+    <!-- Matches the Compose background so the launch window blends in. -->
+    <color name="launch_bg">#FF0A1410</color>
+</resources>

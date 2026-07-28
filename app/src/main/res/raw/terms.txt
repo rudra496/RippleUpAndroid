@@ -1,0 +1,30 @@
+TERMS OF SERVICE — RippleUp
+
+Last updated: 20 July 2026
+
+1. Acceptance
+By installing or using this app you agree to use it for informational and educational purposes only. RippleUp is a youth-led concept demonstrator, not a commercial product or registered service.
+
+2. Permitted use
+- Exploring the app, logging simulated eco actions, and reading the climate research content.
+- Sharing the app or its source link for academic, civic, or community purposes with attribution to Youth for Tomorrow.
+- Referencing the project in coursework, hackathons, or non-profit sustainability initiatives.
+
+3. Prohibited use
+- Commercial resale, rebranding, or re-licensing of the design without written permission.
+- Misrepresenting the platform as an official product of UNICEF, IUCN, or Learning Planet Alliance.
+- Claiming the in-app point values or CO2 figures as certified scientific measurements.
+
+4. No warranty
+The app is provided "as is" without warranties of any kind. Figures shown for CO2 offset, plastic saved, and points are illustrative estimates derived from public sustainability heuristics — not certified measurements.
+
+5. Limitation of liability
+Youth for Tomorrow and the project maintainers are not liable for any direct or indirect loss arising from the use of, or inability to use, this app or its content.
+
+6. Changes
+We may update these terms as the project evolves. The "Last updated" date above will reflect the most recent revision.
+
+7. Governing contact
+For any question regarding these terms, please open an issue at https://github.com/rudra496/ytf.
+
+— Page maintained by Rudra Sarker, Project Developer · Youth for Tomorrow

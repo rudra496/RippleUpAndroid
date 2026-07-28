@@ -1,0 +1,20 @@
+LEGAL NOTICES — RippleUp
+
+Last updated: 20 July 2026
+
+1. Project Identity
+RippleUp is a non-commercial, educational behavior-change concept developed by the youth-led team Youth for Tomorrow for the Learning Planet Alliance / UNICEF-IUCN ecosystem. This Android app is a native companion to the public web simulator and is not a registered company, product, or commercial service.
+
+2. Team & Ownership
+Concept lead: Saara Vishnoi (Welfare Designer). Engineering, deployment & maintenance lead: Rudra Sarker (Project Developer). The full contributor roster is listed on the in-app leaderboard. All member names and roles are published with each individual's consent.
+
+3. Hosting & Source
+This app is built from the open-source project at https://github.com/rudra496/ytf. The Android port source is maintained by Youth for Tomorrow. The app itself runs fully on-device with no server-side application code or database.
+
+4. Intellectual Property
+All original text, layout, design, and code are shared for educational use under the spirit of the Learning Planet Alliance open-community collaboration. Third-party assets (Material Icons, ML Kit, Three.js heritage) remain the property of their respective owners.
+
+5. Contact
+For legal, partnership, or platform questions, please raise an issue on the project's GitHub repository linked above.
+
+— Page maintained by Rudra Sarker, Project Developer · Youth for Tomorrow

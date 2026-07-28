@@ -1,0 +1,20 @@
+COOKIES POLICY — RippleUp
+
+Last updated: 20 July 2026
+
+1. Cookies set by RippleUp
+None. RippleUp is a native Android app, not a website. The concept of browser cookies does not apply. There is no cookie banner because the app simply does not use them.
+
+2. Local data
+The simulator stores points, badges, and streaks in a local on-device database (Room). This data never leaves your phone and is removed when you uninstall the app.
+
+3. Third-party SDKs
+This app bundles Google ML Kit for on-device QR scanning. ML Kit runs entirely on-device and does not transmit scan data to any server.
+
+4. Your controls
+Because RippleUp itself does not collect data or set cookies, no consent choice is required. You control all data via your phone's standard app settings and uninstall.
+
+5. Contact
+Questions can be raised at https://github.com/rudra496/ytf.
+
+— Page maintained by Rudra Sarker, Project Developer · Youth for Tomorrow
