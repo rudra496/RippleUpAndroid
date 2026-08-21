@@ -195,11 +195,8 @@ class GitHubSync(context: Context) {
                 )
             ).toString()
             // keep the last 500 lines (gist size limits)
-            val merged = (existing.trimEnd('
-') + "
-" + entry)
-                .lineSequence().toList().takeLast(500).joinToString("
-")
+            val merged = (existing.trimEnd('\n') + "\n" + entry)
+                .lineSequence().toList().takeLast(500).joinToString("\n")
             val body = JSONObject().apply {
                 put("files", JSONObject().put(fname, JSONObject().put("content", merged)))
             }
