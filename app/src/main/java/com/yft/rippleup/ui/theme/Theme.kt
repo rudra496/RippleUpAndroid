@@ -6,27 +6,27 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 
 /**
- * RippleUp is a deliberately dark, glassy theme. We do not offer a light scheme —
- * the brand identity (dark green glassmorphism) is part of the product, so we
- * ignore the system setting and always render the dark palette.
+ * RipplUp is a deliberately dark, forest-green app (per the Figma "RipplUp UN
+ * MVP" design). We always render the dark palette — the brand identity is part
+ * of the product, so the system setting is ignored.
  */
 private val RippleColors = darkColorScheme(
-    primary = Emerald,
-    onPrimary = BgDeep,
+    primary = Teal,
+    onPrimary = TextPrimary,
     primaryContainer = EmeraldDark,
     onPrimaryContainer = TextPrimary,
-    secondary = EmeraldLight,
+    secondary = TealLight,
     onSecondary = BgDeep,
     tertiary = Gold,
     onTertiary = BgDeep,
-    background = BgDeep,
+    background = BgSurface,
     onBackground = TextPrimary,
     surface = BgSurface,
     onSurface = TextPrimary,
-    surfaceVariant = GlassPanel,
+    surfaceVariant = CardDark,
     onSurfaceVariant = TextSecondary,
     outline = Stroke,
-    outlineVariant = StrokeSubtle,
+    outlineVariant = StrokeSoft,
     error = Coral,
     onError = TextPrimary,
 )

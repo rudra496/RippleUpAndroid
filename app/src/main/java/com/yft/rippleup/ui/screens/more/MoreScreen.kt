@@ -2,12 +2,10 @@ package com.yft.rippleup.ui.screens.more
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,8 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,51 +42,30 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.yft.rippleup.R
 import com.yft.rippleup.ui.components.GlassPanel
-import com.yft.rippleup.ui.components.GradientText
-import com.yft.rippleup.ui.components.SectionHeader
 import com.yft.rippleup.ui.theme.Emerald
 import com.yft.rippleup.ui.theme.Stroke
 
-/** The info hub: about, SDGs, journey, research, legal — all from the web. */
+/**
+ * The informational hub sections (about, SDGs, journey, research, legal,
+ * footer) — embedded inside the Profile screen's scroll. Legal docs open in a
+ * Dialog so they cover the full window regardless of nesting.
+ */
 @Composable
-fun MoreScreen() {
-    val scroll = rememberScrollState()
+fun MoreContent() {
     var openLegal by remember { mutableStateOf<String?>(null) }
 
-    Box(Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scroll)
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            // Hero / brand
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                Box(
-                    Modifier.size(64.dp).clip(CircleShape).background(Emerald.copy(alpha = 0.2f)),
-                    contentAlignment = Alignment.Center,
-                ) { Icon(Icons.Outlined.Public, contentDescription = null, tint = Emerald, modifier = Modifier.size(32.dp)) }
-                Spacer(Modifier.height(8.dp))
-                GradientText("Ripple", style = MaterialTheme.typography.displayMedium)
-                Text("Empowering urban youth to make climate-positive choices, one small action at a time.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 4.dp))
-            }
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        AboutSection()
+        SdgSection()
+        JourneySection()
+        ResearchSection()
+        LegalSection(onOpen = { openLegal = it })
+        TeamFooter()
+        Spacer(Modifier.height(8.dp))
+    }
 
-            AboutSection()
-            SdgSection()
-            JourneySection()
-            ResearchSection()
-            LegalSection(onOpen = { openLegal = it })
-            TeamFooter()
-
-            Spacer(Modifier.height(8.dp))
-        }
-
-        AnimatedVisibility(visible = openLegal != null, modifier = Modifier.fillMaxSize()) {
-            openLegal?.let { LegalReader(docKey = it, onClose = { openLegal = null }) }
-        }
+    openLegal?.let { key ->
+        LegalDialog(docKey = key, onClose = { openLegal = null })
     }
 }
 
@@ -337,7 +312,7 @@ private fun LegalSection(onOpen: (String) -> Unit) {
 }
 
 @Composable
-private fun LegalReader(docKey: String, onClose: () -> Unit) {
+private fun LegalDialog(docKey: String, onClose: () -> Unit) {
     val ctx = LocalContext.current
     val text = remember(docKey) {
         val resId = when (docKey) {
@@ -349,13 +324,8 @@ private fun LegalReader(docKey: String, onClose: () -> Unit) {
         }
         ctx.resources.openRawResource(resId).bufferedReader().use { it.readText() }
     }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.9f))
-            .padding(16.dp),
-    ) {
-        GlassPanel(modifier = Modifier.fillMaxSize(), cornerRadius = 22) {
+    androidx.compose.ui.window.Dialog(onDismissRequest = onClose) {
+        GlassPanel(modifier = Modifier.fillMaxWidth().height(560.dp), cornerRadius = 22) {
             Column(Modifier.fillMaxSize()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
@@ -368,7 +338,11 @@ private fun LegalReader(docKey: String, onClose: () -> Unit) {
                     }
                 }
                 Spacer(Modifier.height(8.dp))
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState()),
+                ) {
                     Text(text, style = MaterialTheme.typography.bodyMedium)
                 }
             }

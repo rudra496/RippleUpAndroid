@@ -100,4 +100,15 @@ class StatsRepository(context: Context) {
             )
         )
     }
+
+    /**
+     * Redeem a reward: deducts [cost] points if the balance covers it.
+     * Returns true on success, false when the balance is insufficient.
+     */
+    suspend fun redeem(cost: Int): Boolean {
+        val cur = dao.getStats() ?: return false
+        if (cur.points < cost) return false
+        dao.upsertStats(cur.copy(points = cur.points - cost))
+        return true
+    }
 }

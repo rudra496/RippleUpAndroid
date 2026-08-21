@@ -45,4 +45,9 @@ class StatsViewModel(app: Application) : AndroidViewModel(app) {
     fun completeOnboarding(name: String) {
         viewModelScope.launch { repo.completeOnboarding(name) }
     }
+
+    /** Redeem a reward; result is delivered via the returned callback-friendly suspend call. */
+    fun redeem(cost: Int, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch { onResult(repo.redeem(cost)) }
+    }
 }

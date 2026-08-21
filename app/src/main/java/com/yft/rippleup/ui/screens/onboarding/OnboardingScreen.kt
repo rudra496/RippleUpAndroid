@@ -28,9 +28,9 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,21 +39,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.yft.rippleup.ui.components.EcoGlobe
-import com.yft.rippleup.ui.components.GlassPanel
-import com.yft.rippleup.ui.components.GradientText
+import com.yft.rippleup.ui.components.LeafLogo
 import com.yft.rippleup.ui.theme.BgDeep
-import com.yft.rippleup.ui.theme.Emerald
+import com.yft.rippleup.ui.theme.FieldBg
+import com.yft.rippleup.ui.theme.Teal
+import com.yft.rippleup.ui.theme.TealSoft
 import kotlinx.coroutines.launch
 
 /**
- * Three-page intro (mission, how it works, name) then "Get Started" lands the
- * user on the dashboard. Mirrors the hero + about cards from the web.
+ * Figma-style onboarding: splash leaf mark -> how-it-works -> name entry.
+ * Deep green background, teal accents, dark fields.
  */
 @Composable
 fun OnboardingScreen(onDone: (String) -> Unit) {
@@ -63,24 +64,15 @@ fun OnboardingScreen(onDone: (String) -> Unit) {
 
     Box(Modifier.fillMaxSize().background(BgDeep)) {
         Column(Modifier.fillMaxSize().padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            // Eco-globe up top, echoing the web hero animation.
-            Box(Modifier.fillMaxWidth().height(220.dp), contentAlignment = Alignment.Center) {
-                EcoGlobe(modifier = Modifier.size(220.dp))
+            Box(Modifier.fillMaxWidth().height(240.dp), contentAlignment = Alignment.Center) {
+                LeafLogo(size = 200.dp)
             }
 
             HorizontalPager(state = pager, modifier = Modifier.weight(1f)) { page ->
                 when (page) {
-                    0 -> IntroPage(
-                        headline = "Turn Everyday",
-                        highlight = "Sustainable Actions",
-                        tail = "Into Rewards",
-                        body = "RippleUp turns eco habits — refilling bottles, recycling, green commuting — into points, streaks, and community impact.",
-                    )
+                    0 -> SplashPage()
                     1 -> HowItWorks()
-                    2 -> NamePage(
-                        name = name,
-                        onNameChange = { name = it },
-                    )
+                    2 -> NamePage(name = name, onNameChange = { name = it })
                 }
             }
 
@@ -99,7 +91,7 @@ fun OnboardingScreen(onDone: (String) -> Unit) {
                 },
                 modifier = Modifier.fillMaxWidth().height(54.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Emerald, contentColor = BgDeep),
+                colors = ButtonDefaults.buttonColors(containerColor = Teal, contentColor = Color(0xFF04241E)),
             ) {
                 Text(
                     if (pager.currentPage < 2) "Continue" else "Start Earning Points",
@@ -114,22 +106,31 @@ fun OnboardingScreen(onDone: (String) -> Unit) {
 }
 
 @Composable
-private fun IntroPage(headline: String, highlight: String, tail: String, body: String) {
+private fun SplashPage() {
     Column(
         modifier = Modifier.fillMaxSize().padding(vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        GlassPanel(modifier = Modifier.fillMaxWidth(), cornerRadius = 24) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(headline, style = MaterialTheme.typography.displayMedium, textAlign = TextAlign.Center)
-                GradientText(highlight, style = MaterialTheme.typography.displayMedium)
-                Text(tail, style = MaterialTheme.typography.displayMedium, textAlign = TextAlign.Center)
-                Spacer(Modifier.height(16.dp))
-                Text(body, style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
-            }
-        }
+        Text(
+            "Turn everyday actions",
+            style = MaterialTheme.typography.headlineMedium,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Text(
+            "into rewards",
+            style = MaterialTheme.typography.headlineMedium,
+            textAlign = TextAlign.Center,
+            color = TealSoft,
+        )
+        Spacer(Modifier.height(14.dp))
+        Text(
+            "RipplUp rewards your sustainable habits — refills, recycling, green commutes — with points, streaks and community impact.",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 
@@ -143,28 +144,32 @@ private fun HowItWorks() {
         Step(Icons.Outlined.Recycling, "2. Track Impact",
             "Watch your CO₂ savings, plastic avoided, and streak build in real time."),
         Step(Icons.Outlined.Redeem, "3. Unlock Rewards",
-            "Earn points, badges, and discounts at local sustainable vendors."),
+            "Redeem points for discounts at local sustainable vendors, badges, and certificates."),
     )
     Column(
         modifier = Modifier.fillMaxSize().padding(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text("How RippleUp Works", style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center,
+        Text("How RipplUp Works", style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth())
         steps.forEach { s ->
-            GlassPanel(modifier = Modifier.fillMaxWidth(), cornerRadius = 20,
-                contentPadding = PaddingValues(16.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        Modifier.size(46.dp).clip(CircleShape).background(Emerald.copy(alpha = 0.2f)),
-                        contentAlignment = Alignment.Center,
-                    ) { Icon(s.icon, contentDescription = null, tint = Emerald) }
-                    Spacer(Modifier.size(12.dp))
-                    Column {
-                        Text(s.title, style = MaterialTheme.typography.titleMedium)
-                        Text(s.body, style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    Modifier.size(46.dp).clip(CircleShape).background(Teal.copy(alpha = 0.18f)),
+                    contentAlignment = Alignment.Center,
+                ) { Icon(s.icon, contentDescription = null, tint = Teal) }
+                Spacer(Modifier.size(12.dp))
+                Column {
+                    Text(s.title, style = MaterialTheme.typography.titleMedium)
+                    Text(s.body, style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
@@ -180,7 +185,7 @@ private fun NamePage(name: String, onNameChange: (String) -> Unit) {
     ) {
         Text("What should we call you?", style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
         Spacer(Modifier.height(10.dp))
-        Text("We'll personalise your dashboard. You can keep earning anonymously — this stays on your device.",
+        Text("We'll personalise your dashboard. This stays on your device.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
         Spacer(Modifier.height(24.dp))
@@ -189,9 +194,17 @@ private fun NamePage(name: String, onNameChange: (String) -> Unit) {
             onValueChange = onNameChange,
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Your name") },
-            placeholder = { Text("e.g. Rudra") },
+            placeholder = { Text("e.g. Ayaan") },
             singleLine = true,
             shape = RoundedCornerShape(14.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = FieldBg,
+                unfocusedContainerColor = FieldBg,
+                focusedBorderColor = Teal,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+            ),
             keyboardOptions = KeyboardOptions(
                 capitalization = KeyboardCapitalization.Words,
                 imeAction = ImeAction.Done,
@@ -211,7 +224,7 @@ private fun Dots(currentPage: Int, pageCount: Int) {
                     .then(if (active) Modifier.width(24.dp) else Modifier.width(8.dp))
                     .clip(CircleShape)
                     .background(
-                        if (active) Emerald
+                        if (active) Teal
                         else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                     )
             )
