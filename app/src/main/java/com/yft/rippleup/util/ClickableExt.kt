@@ -1,5 +1,6 @@
 package com.yft.rippleup.util
 
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.Modifier
 
 /**
