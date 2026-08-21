@@ -29,6 +29,9 @@ import com.yft.rippleup.ui.StatsViewModel
 import com.yft.rippleup.ui.screens.actions.ActionsScreen
 import com.yft.rippleup.ui.screens.dashboard.DashboardScreen
 import com.yft.rippleup.ui.screens.leaderboard.LeaderboardScreen
+import com.yft.rippleup.ui.screens.more.DiscoverScreen
+import com.yft.rippleup.ui.screens.more.EventsScreen
+import com.yft.rippleup.ui.screens.more.NotificationsScreen
 import com.yft.rippleup.ui.screens.onboarding.OnboardingScreen
 import com.yft.rippleup.ui.screens.profile.ProfileScreen
 import com.yft.rippleup.ui.screens.rewards.RewardsScreen
@@ -119,14 +122,16 @@ private fun AppScaffold(vm: StatsViewModel, navController: NavHostController) {
                     onOpenActions = { go(Routes.Actions) },
                     onOpenScan = { go(TopDest.Scan.route) },
                     onOpenRewards = { go(TopDest.Rewards.route) },
-                    onOpenLeaderboard = { go(TopDest.Leaderboard.route) },
+                    onOpenLeaderboard = { go(Routes.Events) },
                 )
             }
-            composable(TopDest.Leaderboard.route) { LeaderboardScreen() }
+            composable(TopDest.Discover.route) { DiscoverScreen() }
             composable(TopDest.Scan.route) { ScanScreen(vm) }
             composable(TopDest.Rewards.route) { RewardsScreen(vm) }
             composable(TopDest.Profile.route) { ProfileScreen(vm) }
             composable(Routes.Actions) { ActionsScreen(vm) }
+            composable(Routes.Notifications) { NotificationsScreen() }
+            composable(Routes.Events) { EventsScreen() }
         }
     }
 }

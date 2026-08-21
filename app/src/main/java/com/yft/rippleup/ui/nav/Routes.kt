@@ -19,7 +19,7 @@ enum class TopDest(
     val icon: ImageVector,
 ) {
     Home("home", "Home", Icons.Outlined.Home),
-    Leaderboard("leaderboard", "Ranks", Icons.Outlined.EmojiEvents),
+    Discover("discover", "Discover", Icons.Outlined.Explore),
     Scan("scan", "Scan", Icons.Outlined.QrCodeScanner),
     Rewards("rewards", "Rewards", Icons.Outlined.Redeem),
     Profile("profile", "Profile", Icons.Outlined.Person),
@@ -29,5 +29,7 @@ enum class TopDest(
 object Routes {
     const val Onboarding = "onboarding"
     const val Actions = "actions"
+    const val Notifications = "notifications"
+    const val Events = "events"
     val startRoute = TopDest.Home.route
 }
