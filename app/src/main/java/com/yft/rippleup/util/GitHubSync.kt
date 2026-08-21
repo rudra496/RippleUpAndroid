@@ -78,7 +78,6 @@ class GitHubSync(context: Context) {
             conn.disconnect()
         }
     } // withContext
-    }
 
     /** Validates the token by fetching the authenticated user. */
     suspend fun validateToken(t: String): Result<String> {
