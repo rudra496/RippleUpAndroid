@@ -12,7 +12,7 @@ val BgDeep = Color(0xFF07211A)        // deepest screen background (splash green
 val BgSurface = Color(0xFF0D1512)     // main screen background (near-black green)
 val CardDark = Color(0xFF12211B)      // raised card surface
 val CardDarkHi = Color(0xFF183026)    // card hover/pressed state
-val FieldBg = Color(0xFF0F1D17)       // text field background
+val FieldBg = Color(0xFFE8F7F4)       // light mint field card (Figma forms)
 
 // Primary — teal green (Figma #009080 family)
 val Teal = Color(0xFF00907F)          // primary buttons / accents
