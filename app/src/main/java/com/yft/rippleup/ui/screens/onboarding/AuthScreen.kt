@@ -96,7 +96,7 @@ fun AuthScreen(onDone: (String) -> Unit) {
                 modifier = Modifier.padding(start = 6.dp, bottom = 4.dp))
             Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Mint)
                 .padding(horizontal = 14.dp, vertical = 12.dp)) {
-                androidx.compose.material3.BasicTextField(
+                androidx.compose.foundation.text.BasicTextField(
                     value = pass, onValueChange = { pass = it },
                     singleLine = true,
                     visualTransformation = if (show) VisualTransformation.None else PasswordVisualTransformation(),
@@ -143,7 +143,7 @@ fun AuthScreen(onDone: (String) -> Unit) {
 }
 
 @Composable
-private fun SegTab(label: String, active: Boolean, onClick: () -> Unit) {
+private fun androidx.compose.foundation.layout.RowScope.SegTab(label: String, active: Boolean, onClick: () -> Unit) {
     Box(
         Modifier.weight(1f).height(40.dp)
             .clip(RoundedCornerShape(20.dp))
@@ -165,7 +165,7 @@ private fun Field(label: String, hint: String, value: String, onChange: (String)
         Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Mint)
             .padding(horizontal = 14.dp, vertical = 12.dp)) {
             if (value.isEmpty()) Text(hint, fontSize = 14.sp, color = Gray)
-            androidx.compose.material3.BasicTextField(
+            androidx.compose.foundation.text.BasicTextField(
                 value = value, onValueChange = onChange, singleLine = true,
                 textStyle = androidx.compose.ui.text.TextStyle(fontSize = 14.sp, color = Ink),
                 keyboardOptions = KeyboardOptions(keyboardType = type, imeAction = ImeAction.Next),
