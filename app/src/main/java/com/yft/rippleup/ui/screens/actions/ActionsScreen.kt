@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import com.yft.rippleup.data.model.EcoAction
 import com.yft.rippleup.data.repo.LogResult
 import com.yft.rippleup.ui.StatsViewModel
+import com.yft.rippleup.util.clickableNoInd
 import kotlinx.coroutines.launch
 
 // Exact Figma colors

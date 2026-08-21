@@ -169,5 +169,5 @@ private fun SmallBtn(label: String, teal: Boolean = false, danger: Boolean = fal
             .clip(RoundedCornerShape(8.dp)).background(if (enabled) bg else Color(0xFFF0F0F0))
             .border(1.dp, Color(0x14000000), RoundedCornerShape(8.dp))
             .padding(horizontal = 12.dp, vertical = 7.dp)
-            .let { if (enabled) it.then(clickableNoInd(onClick)) else it })
+            .let { if (enabled) it.clickableNoInd(onClick) else it })
 }
