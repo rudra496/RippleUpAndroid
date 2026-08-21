@@ -66,8 +66,15 @@ fun OnboardingScreen(vm: com.yft.rippleup.ui.StatsViewModel, onDone: (String) ->
 
     Box(Modifier.fillMaxSize().background(BgDeep)) {
         Column(Modifier.fillMaxSize().padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(Modifier.fillMaxWidth().height(240.dp), contentAlignment = Alignment.Center) {
-                LeafLogo(size = 200.dp)
+            val topArt = if (pager.currentPage == 0) com.yft.rippleup.R.drawable.fig_hero
+                else com.yft.rippleup.R.drawable.fig_intro
+            Box(Modifier.fillMaxWidth().height(300.dp)) {
+                androidx.compose.foundation.Image(
+                    painter = androidx.compose.ui.res.painterResource(topArt),
+                    contentDescription = null,
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
             }
 
             HorizontalPager(state = pager, modifier = Modifier.weight(1f)) { page ->
