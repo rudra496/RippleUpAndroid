@@ -13,8 +13,8 @@ android {
         applicationId = "com.yft.rippleup"
         minSdk = 24
         targetSdk = 34
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = 3
+        versionName = "2.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -24,11 +24,28 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // Production build: R8 shrink + obfuscation (big perf win) and
+            // signing from env (CI injects the keystore via secrets).
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = if (System.getenv("KEYSTORE_B64") != null) {
+                signingConfigs.create("release") {
+                    val ksFile = rootProject.file("release.keystore")
+                    ksFile.writeBytes(
+                        java.util.Base64.getDecoder().decode(System.getenv("KEYSTORE_B64"))
+                    )
+                    storeFile = ksFile
+                    storePassword = System.getenv("KEYSTORE_PASSWORD")
+                    keyAlias = System.getenv("KEY_ALIAS")
+                    keyPassword = System.getenv("KEY_PASSWORD")
+                }
+            } else {
+                null // unsigned release locally; CI always provides the keystore
+            }
         }
         debug {
             isMinifyEnabled = false
@@ -88,4 +105,7 @@ dependencies {
 
     // Accompanist permissions (runtime permission handling in Compose)
     implementation(libs.accompanist.permissions)
+
+    // Encrypted token storage (GitHub sync)
+    implementation(libs.androidx.security.crypto)
 }

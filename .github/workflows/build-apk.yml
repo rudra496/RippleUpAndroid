@@ -1,12 +1,8 @@
-# Builds a debug APK on every push to main and uploads it as a downloadable
-# artifact — so you can install RippleUp without ever opening Android Studio.
+# Builds a debug APK + a SIGNED RELEASE APK on every push to main.
+# Signing keys are injected from repo secrets (KEYSTORE_B64, KEYSTORE_PASSWORD,
+# KEY_ALIAS, KEY_PASSWORD) — set once via: gh secret set <NAME>.
 #
-# How to get your APK:
-#   1. Push this project to a PUBLIC GitHub repo (e.g. rudra496/RippleUpAndroid).
-#   2. Open the repo → click the "Actions" tab.
-#   3. Click the latest "Build Debug APK" run → scroll to "Artifacts".
-#   4. Download "rippleup-debug-apk" → unzip → you get app-debug.apk.
-#   5. On your phone: enable "Install unknown apps", then tap the APK to install.
+# Get your APKs: repo → Actions → latest "Build APK" run → Artifacts.
 name: Build Debug APK
 
 on:
@@ -14,7 +10,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch: # lets you trigger it manually from the Actions tab
+  workflow_dispatch:
 
 jobs:
   build:
@@ -40,10 +36,28 @@ jobs:
       - name: Build debug APK
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: Upload APK artifact
+      - name: Build signed release APK (R8 optimised)
+        if: ${{ secrets.KEYSTORE_B64 != '' }}
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
+
+      - name: Upload debug APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: rippleup-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Upload signed release APK artifact
+        if: ${{ secrets.KEYSTORE_B64 != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: rippleup-release-apk
+          path: app/build/outputs/apk/release/app-release.apk
           retention-days: 90
           if-no-files-found: error

@@ -56,7 +56,7 @@ fun ConfettiOverlay(
     val progress = remember { Animatable(0f) }
     LaunchedEffect(burstKey) {
         progress.snapTo(0f)
-        progress.animateTo(1f, tween(durationMillis = 1400, easing = LinearEasing))
+        progress.animateTo(1f, tween(durationMillis = 1000, easing = LinearEasing))
     }
 
     Canvas(modifier.fillMaxSize()) {
@@ -71,7 +71,7 @@ fun ConfettiOverlay(
 
 private fun spawnConfetti(): List<Particle> {
     val colors = listOf(Emerald, EmeraldLight, SkyBlue, Gold, Purple)
-    return List(50) {
+    return List(26) {
         val angle = (Math.PI.toFloat() * 1.05f) + (Random.nextFloat() - 0.5f) * Math.PI.toFloat() * 0.5f
         val speed = 3.5f + Random.nextFloat() * 7f
         Particle(

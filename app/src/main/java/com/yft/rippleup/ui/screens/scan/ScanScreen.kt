@@ -92,8 +92,7 @@ fun ScanScreen(vm: StatsViewModel) {
                     enabled = scanEnabled,
                     onScanned = { raw ->
                         val preset = matchPreset(raw) ?: ScanPreset.CampusRefill
-                        logScan(preset, vm)
-                        lastResult = ScanResult(preset)
+                        logScan(preset, vm) { lastResult = ScanResult(preset) }
                     },
                 )
             } else {
@@ -108,8 +107,7 @@ fun ScanScreen(vm: StatsViewModel) {
                 style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             ScanPreset.entries.forEach { preset ->
                 PresetCard(preset = preset) {
-                    logScan(preset, vm)
-                    lastResult = ScanResult(preset)
+                    logScan(preset, vm) { lastResult = ScanResult(preset) }
                 }
             }
             Spacer(Modifier.height(8.dp))
@@ -254,8 +252,9 @@ private data class ScanResult(val preset: ScanPreset)
 private fun matchPreset(raw: String): ScanPreset? =
     ScanPreset.entries.firstOrNull { raw.contains(it.id, ignoreCase = true) }
 
-private fun logScan(preset: ScanPreset, vm: StatsViewModel) {
+private fun logScan(preset: ScanPreset, vm: StatsViewModel, onVerified: () -> Unit) {
     vm.logAction(
+        actionKey = "scan-" + preset.id,
         title = "${preset.title} Scan",
         points = preset.points,
         co2Kg = preset.co2Kg,
@@ -265,5 +264,5 @@ private fun logScan(preset: ScanPreset, vm: StatsViewModel) {
             ScanPreset.RecycleBin -> "green"
         },
         iconTag = preset.iconName,
-    )
+    ) { result -> if (result is com.yft.rippleup.data.repo.LogResult.Success) onVerified() }
 }
