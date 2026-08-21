@@ -212,6 +212,9 @@ private fun GitHubSyncCard(vm: com.yft.rippleup.ui.StatsViewModel) {
                         focusedBorderColor = Teal,
                         unfocusedContainerColor = com.yft.rippleup.ui.theme.FieldBg,
                         focusedContainerColor = com.yft.rippleup.ui.theme.FieldBg,
+                        focusedTextColor = Color(0xFF12211B),
+                        unfocusedTextColor = Color(0xFF12211B),
+                        cursorColor = Teal,
                     ),
                 )
             }
