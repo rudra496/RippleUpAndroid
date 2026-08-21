@@ -37,7 +37,6 @@ jobs:
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Build signed release APK (R8 optimised)
-        if: ${{ secrets.KEYSTORE_B64 != '' }}
         env:
           KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -54,7 +53,6 @@ jobs:
           if-no-files-found: error
 
       - name: Upload signed release APK artifact
-        if: ${{ secrets.KEYSTORE_B64 != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: rippleup-release-apk
