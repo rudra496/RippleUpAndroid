@@ -1,6 +1,5 @@
 package com.yft.rippleup.util
 
-import androidx.compose.foundation.clickable
 import androidx.compose.ui.Modifier
 
 /**
@@ -18,7 +17,7 @@ fun Modifier.clickableNoRipple(onClick: () -> Unit): Modifier = this.then(
 
 /** Indication-free clickable shortcut used by small profile buttons. */
 fun Modifier.clickableNoInd(onClick: () -> Unit): Modifier = this.then(
-    androidx.compose.foundation.clickable(
+    clickable(
         interactionSource = androidx.compose.foundation.interaction.MutableInteractionSource(),
         indication = null,
         onClick = onClick,

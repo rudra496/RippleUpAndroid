@@ -137,8 +137,7 @@ private fun ActionRow(action: EcoAction, onReport: () -> Unit) {
 private fun Tag(label: String, bg: Color, text: Color, onClick: (() -> Unit)? = null) {
     val mod = if (onClick != null) Modifier
         .clip(RoundedCornerShape(8.dp)).background(bg)
-        .let { m -> m.then(androidx.compose.foundation.clickable(onClick = onClick, indication = null,
-            interactionSource = androidx.compose.foundation.interaction.MutableInteractionSource())) }
+.then(com.yft.rippleup.util.clickableNoInd(onClick))
         .padding(horizontal = 10.dp, vertical = 3.dp)
     else Modifier.clip(RoundedCornerShape(8.dp)).background(bg).padding(horizontal = 8.dp, vertical = 2.dp)
     Box(mod) { Text(label, fontSize = 10.sp, color = text, fontWeight = if (onClick != null) FontWeight.Medium else FontWeight.Normal) }
