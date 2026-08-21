@@ -40,6 +40,12 @@ class GitHubSync(context: Context) {
         private const val KEY_GIST_ID = "gist_id"
         private const val KEY_LAST_SYNC = "last_sync"
         private const val GIST_NAME = "ripplup-sync"
+        /**
+         * OAuth App client id for device-flow sign-in (PUBLIC by design — no
+         * secret involved). Create the app at github.com/settings/developers,
+         * set the client id here, and device sign-in activates app-wide.
+         */
+        const val DEVICE_CLIENT_ID = ""
         private const val FILE_NAME = "ripplup-stats.json"
         private const val API = "https://api.github.com"
     }
@@ -86,10 +92,121 @@ class GitHubSync(context: Context) {
         val (code, body) = request("GET", "/user")
         val login = try { JSONObject(body).optString("login", "") } catch (_: Exception) { "" }
         token = saved
-        return if (code == 200 && login.isNotEmpty()) Result.success(login)
-        else Result.failure(IllegalStateException(
+        return if (code == 200 && login.isNotEmpty()) {
+            prefs.edit().putString("gh_login", login).apply()
+            Result.success(login)
+        } else Result.failure(IllegalStateException(
             if (code == 401) "Invalid token (check it has the gist scope)"
             else "GitHub error $code"))
+    }
+
+    /** The verified GitHub username (empty when not linked). */
+    fun githubLogin(): String = prefs.getString("gh_login", "") ?: ""
+
+    // --- OAuth device flow (ready; dormant until DEVICE_CLIENT_ID is set) -----
+
+    /**
+     * Starts the GitHub device-flow sign-in: returns the user code and the
+     * verification URL to show the user ("go to this URL, enter this code").
+     * Requires an OAuth App client id — create one at
+     * github.com/settings/developers (no client secret needed for device flow).
+     */
+    suspend fun deviceStart(): Result<Pair<String, String>> = withContext(Dispatchers.IO) {
+        if (DEVICE_CLIENT_ID.isBlank()) {
+            return@withContext Result.failure(IllegalStateException("Device sign-in not configured yet — use a personal token."))
+        }
+        try {
+            val conn = URL("https://github.com/login/device/code").openConnection() as HttpURLConnection
+            conn.requestMethod = "POST"
+            conn.doOutput = true
+            conn.setRequestProperty("Accept", "application/json")
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+            conn.outputStream.use {
+                it.write("client_id=$DEVICE_CLIENT_ID&scope=gist".toByteArray(Charsets.UTF_8))
+            }
+            val body = conn.inputStream.bufferedReader().use { it.readText() }
+            conn.disconnect()
+            val o = JSONObject(body)
+            val userCode = o.optString("user_code", "")
+            deviceCode = o.optString("device_code", "")
+            val uri = o.optString("verification_uri", "")
+            if (userCode.isNotEmpty() && uri.isNotEmpty()) Result.success(userCode to (uri + "/activate"))
+            else Result.failure(IllegalStateException("unexpected GitHub response"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Polls for the device-flow token after the user authorizes. Returns the
+     * token on success; failure while pending carries "authorization_pending".
+     */
+    suspend fun devicePoll(): Result<String> = withContext(Dispatchers.IO) {
+        if (DEVICE_CLIENT_ID.isBlank()) {
+            return@withContext Result.failure(IllegalStateException("Device sign-in not configured yet"))
+        }
+        try {
+            val conn = URL("https://github.com/login/oauth/access_token").openConnection() as HttpURLConnection
+            conn.requestMethod = "POST"
+            conn.doOutput = true
+            conn.setRequestProperty("Accept", "application/json")
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+            conn.outputStream.use {
+                it.write("client_id=$DEVICE_CLIENT_ID&grant_type=urn:ietf:params:oauth:grant-type:device_code&device_code=$deviceCode".toByteArray(Charsets.UTF_8))
+            }
+            val body = conn.inputStream.bufferedReader().use { it.readText() }
+            conn.disconnect()
+            val o = JSONObject(body)
+            when {
+                o.has("access_token") -> Result.success(o.getString("access_token"))
+                else -> Result.failure(IllegalStateException(o.optString("error", "unknown")))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /** Set by deviceStart; holds the pending device_code between calls. */
+    private var deviceCode: String = ""
+
+    // --- Verified claim ledger ----------------------------------------------------
+
+    /**
+     * Appends one verified-claim entry to ripplup-ledger.jsonl in the user's
+     * secret gist — the auditable record of every rewarded action. Fire-and-
+     * forget: ledger failure never blocks the local action.
+     */
+    suspend fun appendLedger(actionKey: String, points: Int, co2Kg: Double) {
+        if (!hasToken) return
+        try {
+            val id = gistId().getOrNull() ?: return
+            val (c, b) = request("GET", "/gists/$id")
+            if (c != 200) return
+            val files = JSONObject(b).getJSONObject("files")
+            val fname = "ripplup-ledger.jsonl"
+            val existing = if (files.has(fname)) files.getJSONObject(fname).optString("content", "") else ""
+            val entry = JSONObject(
+                mapOf(
+                    "ts" to System.currentTimeMillis(),
+                    "user" to githubLogin(),
+                    "action" to actionKey,
+                    "points" to points,
+                    "co2Kg" to co2Kg,
+                )
+            ).toString()
+            // keep the last 500 lines (gist size limits)
+            val merged = (existing.trimEnd('
+') + "
+" + entry)
+                .lineSequence().toList().takeLast(500).joinToString("
+")
+            val body = JSONObject().apply {
+                put("files", JSONObject().put(fname, JSONObject().put("content", merged)))
+            }
+            request("PATCH", "/gists/$id", body.toString())
+        } catch (_: Exception) {
+            // ledger is best-effort; never crash the app over it
+        }
     }
 
     /** Finds (or creates) the secret sync gist; returns its id. */

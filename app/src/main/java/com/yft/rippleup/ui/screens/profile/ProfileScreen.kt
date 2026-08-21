@@ -219,12 +219,12 @@ private fun GitHubSyncCard(vm: com.yft.rippleup.ui.StatsViewModel) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (!linked) {
                     SyncAction("Link & Save", enabled = tokenInput.isNotBlank()) {
-                        scope.launch {
-                            val res = vm.gitHubSync.validateToken(tokenInput)
-                            res.onSuccess { vm.gitHubSync.token = tokenInput }
-                            snackbar.showSnackbar(
-                                res.fold({ "Linked as @$it ✓" }, { it.message ?: "failed" })
-                            )
+                        vm.linkGitHub(tokenInput) { res ->
+                            scope.launch {
+                                snackbar.showSnackbar(
+                                    res.fold({ "Linked as @$it ✓" }, { it.message ?: "failed" })
+                                )
+                            }
                         }
                     }
                 } else {
@@ -243,8 +243,8 @@ private fun GitHubSyncCard(vm: com.yft.rippleup.ui.StatsViewModel) {
                         }
                     }
                     SyncAction("Unlink", danger = true) {
-                        vm.gitHubSync.clearToken()
-                        scope.launch { snackbar.showSnackbar("Unlinked") }
+                        vm.unlinkGitHub()
+                        scope.launch { snackbar.showSnackbar("Unlinked — actions will require re-verification") }
                     }
                 }
             }

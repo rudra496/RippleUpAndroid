@@ -15,9 +15,9 @@ import kotlinx.coroutines.launch
 import com.yft.rippleup.util.GitHubSync
 
 /**
- * Single app-wide ViewModel. Holds the repository and exposes reactive state;
- * action logging is guarded (cooldowns + daily caps) and results are surfaced
- * to callers via callbacks for immediate UI feedback.
+ * App-wide ViewModel. Production rule: actions can only be logged with a
+ * verified GitHub account linked — every successful claim is also appended to
+ * the user's GitHub gist ledger (auditable, tamper-evident trail).
  */
 class StatsViewModel(app: Application) : AndroidViewModel(app) {
 
@@ -32,10 +32,34 @@ class StatsViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList(),
     )
 
+    /** Whether a verified GitHub account is linked (mandatory for claims). */
+    val gitHubLinked = MutableStateFlow(false)
+
     /** Fires +1 each time an action is successfully logged (confetti trigger). */
     val pulseTick = MutableStateFlow(0)
 
-    init { viewModelScope.launch { repo.ensureSeeded() } }
+    init {
+        viewModelScope.launch {
+            repo.ensureSeeded()
+            gitHubLinked.value = gitHubSync.hasToken
+        }
+    }
+
+    fun linkGitHub(token: String, onResult: (Result<String>) -> Unit) {
+        viewModelScope.launch {
+            val res = gitHubSync.validateToken(token)
+            res.onSuccess {
+                gitHubSync.token = token
+                gitHubLinked.value = true
+            }
+            onResult(res)
+        }
+    }
+
+    fun unlinkGitHub() {
+        gitHubSync.clearToken()
+        gitHubLinked.value = false
+    }
 
     fun logAction(
         actionKey: String,
@@ -46,9 +70,19 @@ class StatsViewModel(app: Application) : AndroidViewModel(app) {
         iconTag: String,
         onResult: (LogResult) -> Unit = {},
     ) {
+        // PRODUCTION RULE: unverified accounts cannot claim actions.
+        if (!gitHubSync.hasToken) {
+            onResult(LogResult.Rejected(
+                "GitHub verification required — link your account first (Onboarding or Profile → GitHub Cloud Sync)."))
+            return
+        }
         viewModelScope.launch {
             val result = repo.logAction(actionKey, title, points, co2Kg, colorTag, iconTag)
-            if (result is LogResult.Success) pulseTick.value += 1
+            if (result is LogResult.Success) {
+                pulseTick.value += 1
+                // Append the verified claim to the GitHub ledger (best-effort).
+                gitHubSync.appendLedger(actionKey, points, co2Kg)
+            }
             onResult(result)
         }
     }

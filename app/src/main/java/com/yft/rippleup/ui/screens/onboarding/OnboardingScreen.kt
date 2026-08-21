@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowForward
+import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material.icons.outlined.Recycling
 import androidx.compose.material.icons.outlined.Redeem
@@ -31,6 +32,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.ImeAction
@@ -57,8 +60,8 @@ import kotlinx.coroutines.launch
  * Deep green background, teal accents, dark fields.
  */
 @Composable
-fun OnboardingScreen(onDone: (String) -> Unit) {
-    val pager = rememberPagerState(initialPage = 0, pageCount = { 3 })
+fun OnboardingScreen(vm: com.yft.rippleup.ui.StatsViewModel, onDone: (String) -> Unit) {
+    val pager = rememberPagerState(initialPage = 0, pageCount = { 4 })
     val scope = rememberCoroutineScope()
     var name by remember { mutableStateOf("") }
 
@@ -73,22 +76,26 @@ fun OnboardingScreen(onDone: (String) -> Unit) {
                     0 -> SplashPage()
                     1 -> HowItWorks()
                     2 -> NamePage(name = name, onNameChange = { name = it })
+                    3 -> GitHubVerifyPage(vm = vm)
                 }
             }
 
-            Dots(currentPage = pager.currentPage, pageCount = 3)
+            Dots(currentPage = pager.currentPage, pageCount = 4)
 
             Spacer(Modifier.height(16.dp))
 
+            val linked by vm.gitHubLinked.collectAsState()
+            val canFinish = pager.currentPage < 3 || linked
             Button(
                 onClick = {
                     val p = pager.currentPage
-                    if (p < 2) {
+                    if (p < 3) {
                         scope.launch { pager.animateScrollToPage(p + 1) }
-                    } else {
+                    } else if (linked) {
                         onDone(name)
                     }
                 },
+                enabled = canFinish,
                 modifier = Modifier.fillMaxWidth().height(54.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Teal, contentColor = Color(0xFF04241E)),
@@ -228,6 +235,79 @@ private fun Dots(currentPage: Int, pageCount: Int) {
                         else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                     )
             )
+        }
+    }
+}
+
+
+@Composable
+private fun GitHubVerifyPage(vm: com.yft.rippleup.ui.StatsViewModel) {
+    val linked by vm.gitHubLinked.collectAsState()
+    var token by remember { mutableStateOf("") }
+    var status by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+
+    Column(
+        modifier = Modifier.fillMaxSize().padding(vertical = 18.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(
+            Icons.Outlined.Cloud,
+            contentDescription = null,
+            tint = Teal,
+            modifier = Modifier.size(52.dp),
+        )
+        Spacer(Modifier.height(10.dp))
+        Text("Verify with GitHub", style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "RipplUp requires a verified GitHub account before you can log actions. " +
+                "Your claims are recorded to a private ledger in your own GitHub.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(18.dp))
+
+        if (linked) {
+            Text("✓ Verified as @" + vm.gitHubSync.githubLogin(), style = MaterialTheme.typography.titleMedium,
+                color = Teal, textAlign = TextAlign.Center)
+        } else {
+            Text(
+                "Create a free token at github.com/settings/tokens (classic, 'gist' scope only) and paste it below:",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = token,
+                onValueChange = { token = it },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("ghp_… or github_pat_…", style = MaterialTheme.typography.bodySmall) },
+                singleLine = true,
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Teal,
+                    unfocusedContainerColor = FieldBg,
+                    focusedContainerColor = FieldBg,
+                ),
+            )
+            Spacer(Modifier.height(12.dp))
+            Button(
+                onClick = {
+                    vm.linkGitHub(token) { res ->
+                        status = res.fold({ "✓ Verified as @$it" }, { it.message ?: "failed" })
+                    }
+                },
+                enabled = token.isNotBlank(),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Teal, contentColor = Color(0xFF04241E)),
+            ) { Text("Verify & Link") }
+            status?.let {
+                Spacer(Modifier.height(8.dp))
+                Text(it, style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
+            }
         }
     }
 }

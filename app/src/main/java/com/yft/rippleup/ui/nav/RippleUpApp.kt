@@ -53,7 +53,7 @@ fun RippleUpApp() {
     }
 
     if (!current.onboarded) {
-        OnboardingScreen(onDone = { name -> vm.completeOnboarding(name) })
+        OnboardingScreen(vm = vm, onDone = { name -> vm.completeOnboarding(name) })
         return
     }
 
