@@ -19,6 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.Eco
 import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material.icons.outlined.PrivacyTip
@@ -179,7 +180,7 @@ private fun GitHubSyncCard(vm: com.yft.rippleup.ui.StatsViewModel) {
         Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    androidx.compose.material.icons.Icons.Outlined.Cloud,
+                    Icons.Outlined.Cloud,
                     contentDescription = null, tint = Teal, modifier = Modifier.size(22.dp),
                 )
                 Spacer(Modifier.width(10.dp))
