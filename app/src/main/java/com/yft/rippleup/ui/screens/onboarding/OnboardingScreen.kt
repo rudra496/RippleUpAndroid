@@ -60,7 +60,7 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun OnboardingScreen(vm: com.yft.rippleup.ui.StatsViewModel, onDone: (String) -> Unit) {
-    val pager = rememberPagerState(initialPage = 0, pageCount = { 4 })
+    val pager = rememberPagerState(initialPage = 0, pageCount = { 3 })
     val scope = rememberCoroutineScope()
     var name by remember { mutableStateOf("") }
 
@@ -75,26 +75,22 @@ fun OnboardingScreen(vm: com.yft.rippleup.ui.StatsViewModel, onDone: (String) ->
                     0 -> SplashPage()
                     1 -> HowItWorks()
                     2 -> NamePage(name = name, onNameChange = { name = it })
-                    3 -> GitHubVerifyPage(vm = vm)
                 }
             }
 
-            Dots(currentPage = pager.currentPage, pageCount = 4)
+            Dots(currentPage = pager.currentPage, pageCount = 3)
 
             Spacer(Modifier.height(16.dp))
 
-            val linked by vm.gitHubLinked.collectAsState()
-            val canFinish = pager.currentPage < 3 || linked
             Button(
                 onClick = {
                     val p = pager.currentPage
-                    if (p < 3) {
+                    if (p < 2) {
                         scope.launch { pager.animateScrollToPage(p + 1) }
-                    } else if (linked) {
+                    } else {
                         onDone(name)
                     }
                 },
-                enabled = canFinish,
                 modifier = Modifier.fillMaxWidth().height(54.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Teal, contentColor = Color(0xFF04241E)),

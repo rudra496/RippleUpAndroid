@@ -187,7 +187,7 @@ private fun GitHubSyncCard(vm: com.yft.rippleup.ui.StatsViewModel) {
                 Text("GitHub Cloud Sync", style = MaterialTheme.typography.titleMedium)
             }
             Text(
-                if (linked) "Linked — your progress backs up to a secret gist in your own GitHub account."
+                if (linked) "Optional cloud backup — your progress saves to a secret gist in your own GitHub account."
                 else "Link your GitHub account to back up progress to your own GitHub (secret gist). Works across devices.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

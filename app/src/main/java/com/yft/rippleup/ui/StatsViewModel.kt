@@ -70,12 +70,6 @@ class StatsViewModel(app: Application) : AndroidViewModel(app) {
         iconTag: String,
         onResult: (LogResult) -> Unit = {},
     ) {
-        // PRODUCTION RULE: unverified accounts cannot claim actions.
-        if (!gitHubSync.hasToken) {
-            onResult(LogResult.Rejected(
-                "GitHub verification required — link your account first (Onboarding or Profile → GitHub Cloud Sync)."))
-            return
-        }
         viewModelScope.launch {
             val result = repo.logAction(actionKey, title, points, co2Kg, colorTag, iconTag)
             if (result is LogResult.Success) {
