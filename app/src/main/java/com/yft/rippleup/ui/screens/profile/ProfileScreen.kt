@@ -179,7 +179,7 @@ private fun GitHubSyncCard(vm: com.yft.rippleup.ui.StatsViewModel) {
         Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    androidx.compose.material.icons.Icons.Outlined.CloudSync,
+                    androidx.compose.material.icons.Icons.Outlined.Cloud,
                     contentDescription = null, tint = Teal, modifier = Modifier.size(22.dp),
                 )
                 Spacer(Modifier.width(10.dp))
@@ -218,13 +218,13 @@ private fun GitHubSyncCard(vm: com.yft.rippleup.ui.StatsViewModel) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (!linked) {
                     SyncAction("Link & Save", enabled = tokenInput.isNotBlank()) {
-                        val res = vm.gitHubSync.validateToken(tokenInput)
                         scope.launch {
+                            val res = vm.gitHubSync.validateToken(tokenInput)
+                            res.onSuccess { vm.gitHubSync.token = tokenInput }
                             snackbar.showSnackbar(
                                 res.fold({ "Linked as @$it ✓" }, { it.message ?: "failed" })
                             )
                         }
-                        res.onSuccess { vm.gitHubSync.token = tokenInput }
                     }
                 } else {
                     SyncAction("Backup now") {
