@@ -1,17 +1,15 @@
 package com.yft.rippleup.ui.screens.dashboard
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -20,12 +18,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AddTask
-import androidx.compose.material.icons.outlined.EmojiEvents
-import androidx.compose.material.icons.outlined.LocalFireDepartment
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.QrCodeScanner
-import androidx.compose.material.icons.outlined.Redeem
+import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.Create
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,34 +29,37 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.Canvas
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.unit.sp
 import com.yft.rippleup.data.repo.ActivityItem
 import com.yft.rippleup.ui.StatsViewModel
-import com.yft.rippleup.ui.components.ActivityRow
 import com.yft.rippleup.ui.components.ConfettiOverlay
-import com.yft.rippleup.ui.components.GlassPanel
-import com.yft.rippleup.ui.theme.BgSurface
-import com.yft.rippleup.ui.theme.CardDark
-import com.yft.rippleup.ui.theme.Gold
-import com.yft.rippleup.ui.theme.LimeGreen
-import com.yft.rippleup.ui.theme.Orange
-import com.yft.rippleup.ui.theme.Teal
-import com.yft.rippleup.ui.theme.TealLight
-import com.yft.rippleup.ui.theme.TealSoft
-import java.util.Calendar
-import kotlin.math.min
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
+// Exact Figma colors (RipplUp UN MVP, Home page)
+private val Bg = Color(0xFFF5F6F6)
+private val Card = Color(0xFFFFFFFF)
+private val Teal = Color(0xFF0D9488)
+private val Ink = Color(0xFF0C2620)
+private val Muted = Color(0xFF5A8A82)
+private val SoftTeal = Color(0xFF479790)
+private val Gold = Color(0xFFF9D14C)
+private val TealGlow = Color(0xFF8FFBE6)
+private val GrayCircle = Color(0xFFD6D6D6)
+private val TagBg = Color(0xFFE8E3DE)
+private val TagInk = Color(0xFF666666)
+private val Orange = Color(0xFFF07021)
+private val OrangeInk = Color(0xFFFFFDF7)
+private val ItemInk = Color(0xFF373737)
 
 /**
- * The Figma home: personalised greeting + avatar, a hero points card with
- * circular progress and leaf flourishes, a 2x2 quick-action grid, streak stats,
- * and the recent-activity feed.
+ * HOME — exact rebuild from the Figma API spec:
+ * weekly habit calendar strip → greeting → gradient streak hero →
+ * Today's Ripples timeline list → Upcoming Events.
  */
 @Composable
 fun DashboardScreen(
@@ -75,298 +72,222 @@ fun DashboardScreen(
     val snapshot by vm.snapshot.collectAsState()
     val activity by vm.recentActivity.collectAsState()
     val pulseTick by vm.pulseTick.collectAsState()
-
     val state = snapshot
-    val scroll = rememberScrollState()
 
-    Box(Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize().background(Bg)) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scroll)
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            GreetingBar(userName = state?.userName ?: "Friend")
+            WeeklyCalendar(streak = state?.streak ?: 0, actions = state?.ecoActions ?: 0)
 
-            PointsHeroCard(
+            Text(
+                "Hey ${state?.userName ?: "there"}!",
+                fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Ink,
+            )
+
+            StreakHero(
+                days = state?.streak ?: 0,
+                co2Grams = ((state?.co2SavedKg ?: 0.0) * 1000).toInt(),
                 points = state?.points ?: 0,
-                co2Kg = state?.co2SavedKg ?: 0.0,
-                streak = state?.streak ?: 0,
-                ecoActions = state?.ecoActions ?: 0,
+                totalActions = state?.ecoActions ?: 0,
             )
 
-            QuickActions(
-                onLogAction = onOpenActions,
-                onScan = onOpenScan,
-                onRewards = onOpenRewards,
-                onLeaderboard = onOpenLeaderboard,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Today’s Ripples list", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Ink,
+                    modifier = Modifier.weight(1f))
+                Icon(Icons.Outlined.Create, contentDescription = "Edit", tint = ItemInk, modifier = Modifier.size(20.dp))
+            }
 
-            RecentActionsSection(activity)
+            TodayList(activity)
+
+            UpcomingEvents()
+
             Spacer(Modifier.height(8.dp))
         }
-
         ConfettiOverlay(burstKey = pulseTick)
     }
 }
 
+/** Mon..Sun cards: gold/teal checks for done days, gray for pending. */
 @Composable
-private fun GreetingBar(userName: String) {
-    val hour = rememberHour()
-    val greeting = when {
-        hour < 12 -> "Good morning"
-        hour < 17 -> "Good afternoon"
-        else -> "Good evening"
-    }
+private fun WeeklyCalendar(streak: Int, actions: Int) {
+    val days = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+    val todayIdx = (LocalDate.now().dayOfWeek.value + 5) % 7 // Mon=0
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
+        Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Column(Modifier.weight(1f)) {
-            Text(
-                "$greeting,",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                userName,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-        }
-        Box(
-            Modifier.size(44.dp).clip(CircleShape).background(Teal.copy(alpha = 0.2f)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                userName.trim().take(1).uppercase().ifEmpty { "R" },
-                color = TealSoft,
-                fontWeight = FontWeight.Bold,
-            )
-        }
-        Spacer(Modifier.width(10.dp))
-        Box(
-            Modifier.size(40.dp).clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(Icons.Outlined.Notifications, contentDescription = "Notifications",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
-}
-
-@Composable
-private fun rememberHour(): Int {
-    return androidx.compose.runtime.remember { Calendar.getInstance().get(Calendar.HOUR_OF_DAY) }
-}
-
-/**
- * Hero card: points balance with a circular progress ring (toward the next
- * badge), CO2 + streak pills, and subtle leaf flourishes — per the Figma.
- */
-@Composable
-private fun PointsHeroCard(points: Int, co2Kg: Double, streak: Int, ecoActions: Int) {
-    // Progress toward Gold badge (16 actions) — echoes the web's badge ladder
-    val progress = (ecoActions / 16f).coerceIn(0f, 1f)
-    val animated by androidx.compose.animation.core.animateFloatAsState(
-        targetValue = progress, androidx.compose.animation.core.tween(900), label = "ring",
-    )
-
-    GlassPanel(
-        modifier = Modifier.fillMaxWidth(),
-        cornerRadius = 26,
-        glow = true,
-        contentPadding = PaddingValues(20.dp),
-    ) {
-        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(contentAlignment = Alignment.Center) {
-                Box(Modifier.size(196.dp), contentAlignment = Alignment.Center) {
-                    Canvas(Modifier.size(196.dp)) {
-                        val stroke = 13.dp.toPx()
-                        val dia = min(size.width, size.height) - stroke
-                        val tl = Offset((size.width - dia) / 2f, (size.height - dia) / 2f)
-                        drawArc(
-                            color = Color.White.copy(alpha = 0.08f),
-                            startAngle = -90f, sweepAngle = 360f, useCenter = false,
-                            topLeft = tl, size = Size(dia, dia),
-                            style = Stroke(stroke, cap = StrokeCap.Round),
-                        )
-                        drawArc(
-                            brush = androidx.compose.ui.graphics.Brush.sweepGradient(
-                                listOf(Teal, TealLight, TealSoft, Teal)
-                            ),
-                            startAngle = -90f, sweepAngle = 360f * animated, useCenter = false,
-                            topLeft = tl, size = Size(dia, dia),
-                            style = Stroke(stroke, cap = StrokeCap.Round),
-                        )
-                    }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            "$points",
-                            style = MaterialTheme.typography.displayLarge,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.onBackground,
-                        )
-                        Text(
-                            "RipplUp Points",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = TealSoft,
-                        )
-                        Text(
-                            "${(16 - ecoActions).coerceAtLeast(0)} actions to Gold",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+        days.forEachIndexed { i, day ->
+            val done = i < todayIdx && actions > 0 && streak > 0 && i < (streak.coerceAtMost(7))
+            val isToday = i == todayIdx && actions > 0 && streak > 0
+            val circleColor = when {
+                isToday -> TealGlow
+                done -> Gold
+                else -> GrayCircle
+            }
+            Column(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Card)
+                    .border(1.dp, Color(0x14000000), RoundedCornerShape(8.dp))
+                    .padding(horizontal = 9.dp, vertical = 6.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(day, fontSize = 12.sp, color = Color(0xFF000000))
+                Spacer(Modifier.height(6.dp))
+                Box(
+                    Modifier.size(22.dp).clip(CircleShape).background(circleColor),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (done || isToday) {
+                        Text("✓", color = if (isToday) Teal else Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
                 }
-                // Leaf flourishes at ring edges (Figma detail)
-                MiniLeaf(Modifier.offset(x = (-8).dp, y = 6.dp).size(22.dp), TealLight)
-                MiniLeaf(Modifier.offset(x = 170.dp, y = 150.dp).size(18.dp), Teal.copy(alpha = 0.7f))
             }
+        }
+    }
+}
 
-            Spacer(Modifier.height(14.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+/** Gradient teal hero: streak circle + copy + pills. Exact: 364x120 r=24. */
+@Composable
+private fun StreakHero(days: Int, co2Grams: Int, points: Int, totalActions: Int) {
+    Box(
+        Modifier.fillMaxWidth().height(120.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(Brush.linearGradient(listOf(Color(0xFF14B8A6), Teal))),
+    ) {
+        Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier.size(84.dp).clip(CircleShape)
+                    .background(Brush.radialGradient(listOf(Color(0xFF508E89), Teal))),
+                contentAlignment = Alignment.Center,
             ) {
-                StatPill(
-                    modifier = Modifier.weight(1f),
-                    icon = { Icon(Icons.Outlined.LocalFireDepartment, null, tint = Orange, modifier = Modifier.size(16.dp)) },
-                    value = "$streak",
-                    label = "day streak",
-                    tint = Orange,
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("$days", fontSize = 26.sp, fontWeight = FontWeight.Bold, color = ItemInk)
+                    Text("Days", fontSize = 12.sp, color = Color(0xFF96BAB0))
+                }
+            }
+            Spacer(Modifier.width(14.dp))
+            Column(Modifier.weight(1f)) {
+                Text("Your Ripples have been adding up!",
+                    fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = ItemInk)
+                Text(
+                    "You've helped avoid an estimated ${if (co2Grams >= 1000) "%.1f".format(co2Grams / 1000.0) + " kg" else "$co2Grams g"} CO₂e this week.",
+                    fontSize = 12.sp, color = Muted,
                 )
-                StatPill(
-                    modifier = Modifier.weight(1f),
-                    icon = {
-                        Text("CO₂", style = MaterialTheme.typography.labelSmall, color = LimeGreen)
-                    },
-                    value = String.format("%.1f", co2Kg),
-                    label = "kg saved",
-                    tint = LimeGreen,
-                )
-                StatPill(
-                    modifier = Modifier.weight(1f),
-                    icon = { Icon(Icons.Outlined.EmojiEvents, null, tint = Gold, modifier = Modifier.size(16.dp)) },
-                    value = "$ecoActions",
-                    label = "actions",
-                    tint = Gold,
-                )
+                Spacer(Modifier.height(10.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    HeroPill("Longest streak", bg = Card, text = SoftTeal)
+                    HeroPill("$days Days", bg = SoftTeal, text = Color(0xFFADE6D5))
+                    HeroPill("$points+ pts", bg = SoftTeal, text = Color(0xFFADE6D5))
+                }
             }
         }
     }
 }
 
 @Composable
-private fun StatPill(
-    modifier: Modifier,
-    icon: @Composable () -> Unit,
-    value: String,
-    label: String,
-    tint: Color,
-) {
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color.White.copy(alpha = 0.05f))
-            .padding(vertical = 10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+private fun HeroPill(label: String, bg: Color, text: Color) {
+    Box(
+        Modifier.clip(RoundedCornerShape(8.dp)).background(bg)
+            .padding(horizontal = 8.dp, vertical = 3.dp),
     ) {
-        icon()
-        Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = tint)
-        Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(label, fontSize = 10.sp, color = text)
     }
 }
 
+/** White timeline card with date chip + ripple items + self/QR report tags. */
 @Composable
-private fun MiniLeaf(modifier: Modifier, color: Color) {
-    Canvas(modifier) {
-        val w = size.width
-        val h = size.height
-        val path = androidx.compose.ui.graphics.Path().apply {
-            moveTo(w / 2f, 0f)
-            quadraticTo(w, h * 0.4f, w / 2f, h)
-            quadraticTo(0f, h * 0.4f, w / 2f, 0f)
-        }
-        drawPath(path, color = color)
-    }
-}
-
-/** The 2x2 quick-action grid from the Figma home. */
-@Composable
-private fun QuickActions(
-    onLogAction: () -> Unit,
-    onScan: () -> Unit,
-    onRewards: () -> Unit,
-    onLeaderboard: () -> Unit,
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("Quick Actions", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-            QuickCard("Log Action", "+20 pts", Icons.Outlined.AddTask, Teal, Modifier.weight(1f), onLogAction)
-            QuickCard("Scan QR", "verify", Icons.Outlined.QrCodeScanner, TealLight, Modifier.weight(1f), onScan)
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-            QuickCard("Rewards", "redeem", Icons.Outlined.Redeem, Gold, Modifier.weight(1f), onRewards)
-            QuickCard("Leaderboard", "ranks", Icons.Outlined.EmojiEvents, Color(0xFF9B7EF0), Modifier.weight(1f), onLeaderboard)
-        }
-    }
-}
-
-@Composable
-private fun QuickCard(
-    title: String,
-    subtitle: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    tint: Color,
-    modifier: Modifier,
-    onClick: () -> Unit,
-) {
+private fun TodayList(activity: List<ActivityItem>) {
     Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(18.dp))
-            .background(CardDark)
-            .clickable(onClick = onClick)
-            .padding(16.dp),
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(Card)
+            .border(1.dp, Color(0x14000000), RoundedCornerShape(24.dp)).padding(14.dp),
     ) {
-        Box(
-            Modifier.size(42.dp).clip(CircleShape).background(tint.copy(alpha = 0.16f)),
-            contentAlignment = Alignment.Center,
-        ) { Icon(icon, contentDescription = title, tint = tint, modifier = Modifier.size(22.dp)) }
-        Spacer(Modifier.height(10.dp))
-        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        Text(subtitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        val today = LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE, MMM d"))
+        Text(today, fontSize = 12.sp, color = Muted,
+            modifier = Modifier.align(Alignment.CenterHorizontally))
+
+        if (activity.isEmpty()) {
+            Spacer(Modifier.height(18.dp))
+            Text("No ripples yet today.", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Ink)
+            Text("Log your first sustainable action to start your ripple!", fontSize = 12.sp, color = Muted)
+            Spacer(Modifier.height(18.dp))
+        } else {
+            activity.take(3).forEachIndexed { idx, item ->
+                Spacer(Modifier.height(10.dp))
+                RippleRow(item)
+            }
+        }
     }
 }
 
 @Composable
-private fun RecentActionsSection(activity: List<ActivityItem>) {
-    GlassPanel(modifier = Modifier.fillMaxWidth(), cornerRadius = 22) {
-        Column {
-            Text("Recent Verified Actions", style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold)
-            Spacer(Modifier.height(6.dp))
-            if (activity.isEmpty()) {
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    "No actions yet. Tap Log Action to record your first sustainable action and watch the confetti fly! 🍃",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.height(16.dp))
-            } else {
-                activity.take(6).forEach { item ->
-                    ActivityRow(
-                        title = item.title,
-                        points = item.points,
-                        colorTag = item.colorTag,
-                        iconTag = item.iconTag,
-                        timestamp = item.timestamp,
-                    )
+private fun RippleRow(item: ActivityItem) {
+    Row(Modifier.fillMaxWidth()) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(
+                Modifier.size(23.dp).clip(CircleShape).background(Teal)
+                    .border(2.dp, Card, CircleShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text("✓", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            }
+            if (true) {
+                Spacer(Modifier.height(4.dp))
+                Box(Modifier.width(1.dp).height(30.dp).background(Color(0x1F0D9488)))
+            }
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(item.title, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF000000))
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Tag(item.tagLabel(), bg = TagBg, text = TagInk)
+                Tag("+${item.points} pts",
+                    bg = if (item.colorTag == "green") Orange else Color(0xFF8F8F8F),
+                    text = OrangeInk)
+            }
+        }
+    }
+}
+
+private fun ActivityItem.tagLabel(): String = if (iconTag.contains("Qr", true)) "QR Reported" else "Self Reported"
+
+@Composable
+private fun Tag(label: String, bg: Color, text: Color) {
+    Box(Modifier.clip(RoundedCornerShape(8.dp)).background(bg).padding(horizontal = 8.dp, vertical = 2.dp)) {
+        Text(label, fontSize = 10.sp, color = text)
+    }
+}
+
+/** Upcoming Events: header + See all + horizontal white r=16 cards. */
+@Composable
+private fun UpcomingEvents() {
+    val events = listOf(
+        "Community Cleanup" to "Sat, Sept 21 · 9:00 AM",
+        "Eco Workshop: Repair Café" to "Sun, Sept 29 · 2:00 PM",
+    )
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Upcoming Events", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Ink,
+                modifier = Modifier.weight(1f))
+            Text("See all", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Teal)
+            Icon(Icons.Outlined.ChevronRight, contentDescription = null, tint = Teal, modifier = Modifier.size(16.dp))
+        }
+        Spacer(Modifier.height(8.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            events.forEach { (title, date) ->
+                Column(
+                    Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).background(Card)
+                        .border(1.dp, Color(0x14000000), RoundedCornerShape(16.dp))
+                        .padding(12.dp),
+                ) {
+                    Box(Modifier.fillMaxWidth().height(52.dp).clip(RoundedCornerShape(10.dp))
+                        .background(Color(0xFFE8F7F4)))
+                    Spacer(Modifier.height(8.dp))
+                    Text(title, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Ink)
+                    Text(date, fontSize = 10.sp, color = Muted)
                 }
             }
         }
