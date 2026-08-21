@@ -64,7 +64,9 @@ fun OnboardingScreen(vm: com.yft.rippleup.ui.StatsViewModel, onDone: (String) ->
     val scope = rememberCoroutineScope()
     var name by remember { mutableStateOf("") }
 
-    Box(Modifier.fillMaxSize().background(BgDeep)) {
+    var showAuth by remember { mutableStateOf(false) }
+    if (showAuth) { AuthScreen(onDone = onDone); return }
+    Box(Modifier.fillMaxSize().background(Color(0xFFF5FFFC))) {
         Column(Modifier.fillMaxSize().padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             val topArt = if (pager.currentPage == 0) com.yft.rippleup.R.drawable.fig_hero
                 else com.yft.rippleup.R.drawable.fig_intro
@@ -95,7 +97,7 @@ fun OnboardingScreen(vm: com.yft.rippleup.ui.StatsViewModel, onDone: (String) ->
                     if (p < 2) {
                         scope.launch { pager.animateScrollToPage(p + 1) }
                     } else {
-                        onDone(name)
+                        showAuth = true
                     }
                 },
                 modifier = Modifier.fillMaxWidth().height(54.dp),
@@ -122,16 +124,18 @@ private fun SplashPage() {
         verticalArrangement = Arrangement.Center,
     ) {
         Text(
-            "Turn everyday actions",
+            "Sustainability, Made Fun",
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onBackground,
         )
         Text(
-            "into rewards",
+            "",
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center,
-            color = TealSoft,
+        )
+        Text(
+            "",
         )
         Spacer(Modifier.height(14.dp))
         Text(
@@ -159,7 +163,7 @@ private fun HowItWorks() {
         modifier = Modifier.fillMaxSize().padding(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text("How RipplUp Works", style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center,
+        Text("Log Actions, Earn Points", style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth())
         steps.forEach { s ->
             Row(
